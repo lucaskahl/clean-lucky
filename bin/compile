@@ -1,0 +1,79 @@
+#!/bin/bash -e
+
+# Invoked as: bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+
+set -e
+
+steptxt="----->"
+
+start() {
+    echo -n "$steptxt $@... "
+}
+
+finished() {
+    echo "done"
+}
+
+###########################################################
+# Crystal core buildpack:
+###########################################################
+
+CURL="curl -s -L --retry 15 --retry-delay 2" # retry for up to 30 seconds
+
+function json_value() {
+    KEY=$1
+    num=$2
+    awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/\042'$KEY'\042/){print $(i+1)}}}' | tr -d ' "' | sed -n ${num}p
+}
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+
+export LUCKY_ENV=production
+export SKIP_LUCKY_TASK_PRECOMPILATION=1
+
+if [ -f $BUILD_DIR/.crystal-version ]; then
+    CRYSTAL_VERSION=`cat $BUILD_DIR/.crystal-version | tr -d '\012'`
+    CRYSTAL_VERSION_REASON='due to .crystal-version file'
+else
+    CRYSTAL_VERSION=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases/latest | json_value tag_name 1 | tr -d '\012'`
+    CRYSTAL_VERSION_REASON='due to latest release at https://github.com/crystal-lang/crystal'
+fi
+
+TAG_NAME=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases | json_value tag_name | grep ${CRYSTAL_VERSION}`
+CRYSTAL_URL=`${CURL} https://api.github.com/repos/crystal-lang/crystal/releases/tags/${TAG_NAME} | grep 'https://github.com/crystal-lang/crystal/releases/download/.*-linux-x86_64.tar.gz' | sed 's/.*: "\(.*\)"/\1/'`
+CRYSTAL_DIR=$BUILD_DIR/.heroku/crystal
+unset GIT_DIR
+
+# Install Crystal
+mkdir -p $ENV_DIR
+mkdir -p $CACHE_DIR
+mkdir -p $CRYSTAL_DIR
+mkdir -p $BUILD_DIR/.profile.d
+mkdir -p $BUILD_DIR/.heroku/crystal
+mkdir -p $BUILD_DIR/.heroku/lucky
+start "Installing Crystal ($CRYSTAL_VERSION $CRYSTAL_VERSION_REASON) from $CRYSTAL_URL to $CRYSTAL_DIR"
+${CURL} $CRYSTAL_URL | tar xz -C $CRYSTAL_DIR --strip-component=1
+finished
+PATH="${PATH}:${CRYSTAL_DIR}/bin:${CRYSTAL_DIR}/embedded/bin/"
+echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/crystal_environment.sh"
+
+###########################################################
+# End of Crystal core buildpack
+###########################################################
+
+cd "$BUILD_DIR"
+
+start "Using the downloaded shards compiling tasks"
+
+# shards build --production --release --ignore-crystal-version
+# finished
+
+start "Setting up Lucky tasks"
+
+crystal build tasks.cr -o "$BUILD_DIR/.heroku/lucky/lucky"
+
+echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> "$BUILD_DIR/.profile.d/lucky_environment.sh"
+
+finished

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if grep lucky "$1/src/shards.cr" ; then
+  echo "Lucky"
+  exit 0
+else
+  exit 1
+fi
