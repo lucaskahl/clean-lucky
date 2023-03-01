@@ -65,10 +65,12 @@ echo "export PATH=\$HOME/.heroku/crystal/bin:\$PATH" >> "$BUILD_DIR/.profile.d/c
 
 cd "$BUILD_DIR"
 
-if [ -f $BUILD_DIR/bin ]; then
+if [ -d $BUILD_DIR/bin ]; then
     start "Using the already compiled shards"
+    echo "Using the already compiled shards"
 else
     start "Installing shards and compiling project"
+    echo "Installing shards and compiling project"
     shards build --production --release --ignore-crystal-version
 fi
 
