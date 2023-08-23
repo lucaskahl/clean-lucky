@@ -78,6 +78,7 @@ start "Setting up Lucky tasks"
 if [ -d $BUILD_DIR/bin ]; then
     echo "Moving up built Lucky tasks"
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/.heroku/lucky/lucky"
+    cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/.heroku/lucky"
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/lucky"
     cp "$BUILD_DIR/bin/tasks" "\$PATH:\$HOME/.heroku/lucky"
 else
