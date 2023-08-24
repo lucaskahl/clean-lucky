@@ -78,14 +78,12 @@ start "Setting up Lucky tasks"
 if [ -d $BUILD_DIR/bin ]; then
     echo "Moving up built Lucky tasks"
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/.heroku/lucky/lucky"
+    chmod +x $BUILD_DIR/.heroku/lucky/lucky
 else
     echo "Setting up Lucky tasks"
     crystal build tasks.cr -o "$BUILD_DIR/.heroku/lucky/lucky"
 fi
 
 echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> "$BUILD_DIR/.profile.d/lucky_environment.sh"
-
-echo "Current PATH: $PATH"
-which lucky
 
 finished
