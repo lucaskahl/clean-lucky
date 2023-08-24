@@ -84,16 +84,8 @@ else
 fi
 
 echo "export PATH=\$PATH:\$HOME/.heroku/lucky" >> "$BUILD_DIR/.profile.d/lucky_environment.sh"
-echo "----------------------------------------------------------------"
-cat $BUILD_DIR/.profile.d/lucky_environment.sh
-cd .heroku
-echo "----------------------------------------------------------------"
-ls -la
 
-echo "----------------------------------------------------------------"
-
-cd lucky
-
-ls -la
+echo "Current PATH: $PATH"
+which lucky
 
 finished
