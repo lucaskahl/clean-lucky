@@ -81,7 +81,6 @@ if [ -d $BUILD_DIR/bin ]; then
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/.heroku/lucky/lucky"
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/.heroku/lucky"
     cp "$BUILD_DIR/bin/tasks" "$BUILD_DIR/lucky"
-    cp "$BUILD_DIR/bin/tasks" "$HOME/.heroku/lucky"
 else
     echo "Setting up Lucky tasks"
     crystal build tasks.cr -o "$BUILD_DIR/.heroku/lucky/lucky"
