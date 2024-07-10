@@ -68,12 +68,16 @@ cd "$BUILD_DIR"
 if [ -d $BUILD_DIR/bin ]; then
     start "Using the already compiled shards"
     echo "Using the already compiled shards"
+    start "1.."
+    echo "1.."  
 else
     start "Installing shards and compiling project"
     echo "Installing shards and compiling project"
     shards build --production --release --ignore-crystal-version
 fi
 
+start "Installing Lucky tasks"
+echo "Installing Lucky tasks"
 start "Setting up Lucky tasks"
 crystal build tasks.cr -o "$BUILD_DIR/.heroku/lucky/lucky" --release --progress --no-debug
 
